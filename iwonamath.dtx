@@ -13,6 +13,7 @@
 %<*driver>
 \documentclass{l3doc}
 \usepackage{iwonamath}
+\usepackage{natbib}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -35,7 +36,58 @@
 %\section{User manual}
 %\label{sec:ug}
 %
-% Iwona is a sans serif typeface by Janusz Marian Nowacki, 
+%
+%
+%
+% Iwona is a sans serif typeface by Janusz Marian Nowacki.  It has a
+% very good math support~\cite{iwona}.  Package \pkg{iwona} integrates
+% text and math fonts.  However, the math fonts may provide
+% interesting companions for other text fonts.  To enable the
+% combination, this package separates math fonts and provides tools
+% for the package writers to mix and match them with text.
+%
+% The package has the following options:
+% \begin{description}
+% \item[base] the base weight of the math fonts, either |regular|
+%   (default) or |light|.
+% \item[condensed] whether the math fonts use the condensed version of
+% Iwona, either |true| or |false| (default).
+% \item[Scale] the scale of the fonts, a number (by default 1).
+% \item[standardversions] whether to define standard versions |normal|
+% and |bold|, either |true| (default) or |false|.  If |false|, then
+% the package does not define any math fonts, and it is up to the user
+% to deploy \cmd{\DeclareIwonaMathVersion} do define them.  
+% \end{description}
+%
+% \begin{function}{\DeclareIwonaMathVersion}
+%   The main function of the package,
+%   \cmd{\DeclareIwonaMathVersion}\marg{keys-values} declares a new
+%   math version based on Iwona fonts.  The keys are the following:
+%   \begin{description}
+%   \item[name] the name of the version.  By default, |normal|.
+%   \item[base] the base weight of the font, either |regular| or
+%   |light|.
+% \item[condensed] whether the math fonts use the condensed version of
+% Iwona, either |true| or |false| (default).
+%   \item[weight] the weight of the font, either |normal| or |bold|.
+%   \end{description}
+% \end{function}
+%
+% Note that in the current implementation the |Scale| parameter is the
+% same for all versions defined.
+%
+% For example, the following invocation defines four math versions,
+% |normal|, |bold|, |condensed| and |boldcondensed|, based on Iwona
+% light, scaled 1.2:
+% \begin{verbatim}
+% \usepackage[Scale=1.2, base=light]{iwonamath}
+% \DeclareIwonaMathVersion{name=condensed, base=light,
+%                          condensed=true}
+% \DeclareIwonaMathVersion{name=boldcondensed, base=light,
+%                          weight=bold, condensed=true}
+% \end{verbatim}
+%
+%
 % \end{documentation}
 %
 % \begin{implementation}
@@ -43,6 +95,7 @@
 %\section{Implementation}
 %\label{sec:impl}
 %
+% First, we declare who we are:
 %    \begin{macrocode}
 %<*package>
 %<@@=iwonamath>
@@ -51,7 +104,52 @@
 {Scaled Iwona math fonts}
 %    \end{macrocode}
 %
+% \begin{variable}{\l_@@_size_tl, \l_@@_mainbase_tl,
+%                  \l_@@_maincondensed_bool, \l_@@_standardversions_bool}
+% We define the main keys here
+%    \begin{macrocode}
+\tl_new:N \l_@@_mainbase_tl
+\keys_define:nn { iwonamath/options }
+{
+  Size .tl_set:N = \l_@@_size_tl,
+  base .choices:nn =
+    { regular, light }
+    {\tl_set:Nx \l_@@_mainbase_tl \l_keys_choice_tl},
+  condensed .bool_set:N = \l_@@_maincondensed_bool,
+  standardversions .bool_set:N = \l_@@_standardversions_bool,
+}
+
+\keys_set:nn {iwonamath/options }
+{
+  Size = 1,
+  base = regular,
+  condensed = false,
+  standardversions = true,
+}
+%    \end{macrocode}
+%   
+% \end{variable}
+%
+%
+% Options processing
+%    \begin{macrocode}
+\IfFormatAtLeastTF { 2022-06-01 }
+  { \ProcessKeyOptions [ iwonamath/options ] }
+  {
+    \RequirePackage { l3keys2e }
+    \ProcessKeysOptions { iwonamath/options }
+  }
+%    \end{macrocode}% 
+%
+%
+% 
+%
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
 % \end{implementation}
+%
+% \bibliography{iwonamath}
+% \bibliographystyle{plainnat}
+%
+%  \PrintIndex
