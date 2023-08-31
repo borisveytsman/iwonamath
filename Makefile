@@ -4,11 +4,33 @@ SAMPLES =
 
 PDF = $(PACKAGE).pdf 
 
-all:  ${PDF}
+FD = \
+	omliwonamath.fd \
+	omliwonamathc.fd \
+	omliwonamathl.fd \
+	omliwonamathlc.fd \
+	omsiwonamath.fd \
+	omsiwonamathc.fd \
+	omsiwonamathcmsy.fd \
+	omsiwonamathl.fd \
+	omsiwonamathlc.fd \
+	omxiwonamath.fd \
+	omxiwonamathc.fd \
+	omxiwonamathl.fd \
+	omxiwonamathlc.fd \
+	ot1iwonamath.fd \
+	ot1iwonamathc.fd \
+	ot1iwonamathcm.fd \
+	ot1iwonamathl.fd \
+	ot1iwonamathlc.fd \
+	ot1iwonamathlcm.fd \
+	ot1iwonamathlm.fd \
+	ot1iwonamathm.fd 
+
+all:  ${PDF} $(PACKAGE).sty $(FD)
 
 
-
-%.pdf:  %.dtx   $(PACKAGE).cls
+%.pdf:  %.dtx   $(PACKAGE).sty
 	pdflatex $<
 	- bibtex $*
 	pdflatex $<
@@ -18,33 +40,35 @@ all:  ${PDF}
 	while ( grep -q '^LaTeX Warning: Label(s) may have changed' $*.log) \
 	do pdflatex $<; done
 
-%.pdf: %.Rmd $(PACKAGE).cls amnestytemplate.tex
-	Rscript -e "rmarkdown::render('$<', output_file='$@',  output_format='pdf_document')"
 
-%.cls:   %.ins %.dtx  
+%.sty:   %.ins %.dtx  
 	pdflatex $<
 
-%.pdf:  %.tex   $(PACKAGE).cls
+%.pdf:  %.tex   $(PACKAGE).sty
 	pdflatex $<
 	- bibtex $*
 	pdflatex $<
 	while ( grep -q '^LaTeX Warning: Label(s) may have changed' $*.log) \
 	do pdflatex $<; done
 
-.PRECIOUS:  $(PACKAGE).cfg $(PACKAGE).cls
+%.fd: $(PACKAGE).ins $(PACKAGE).dtx
+	pdflatex $<
+	./makeiwonamathfd.sh
+
+
 
 
 clean:
-	$(RM)  $(PACKAGE).cls *.log *.aux \
+	$(RM)  *_FAMILY_* *.log *.aux \
 	*.cfg *.glo *.idx *.toc \
 	*.ilg *.ind *.out *.lof \
 	*.lot *.bbl *.blg *.gls \
 	*.dvi *.ps *.thm *.tgz *.zip *.rpi sample.tex \
         *.hd sample-blx.bib
-	$(RM) -r sample_files
+
 
 distclean: clean
-	$(RM) $(PDF) 
+	$(RM) $(PDF) $(PACKAGE).sty $(FD) 
 
 #
 # Archive for the distribution. Includes typeset documentation
@@ -56,7 +80,7 @@ archive:  all clean
 	mv ../$(PACKAGE).tgz .
 
 zip:  all clean
-	make $(PACKAGE).cls
+	make $(PACKAGE).sty
 	$(RM) $(PACKAGE).log
 	cd ..;\
 	zip -r  $(PACKAGE).zip $(PACKAGE) -x "*.ins" -x "*.gitignore"

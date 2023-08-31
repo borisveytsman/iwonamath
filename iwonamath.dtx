@@ -13,7 +13,8 @@
 %<*driver>
 \documentclass{l3doc}
 \usepackage{iwonamath}
-\usepackage{natbib}
+\usepackage{natbib, booktabs}
+\usepackage[tableposition=top]{caption}
 \begin{document}
   \DocInput{\jobname.dtx}
 \end{document}
@@ -46,6 +47,12 @@
 % combination, this package separates math fonts and provides tools
 % for the package writers to mix and match them with text.
 %
+% \begin{variable}{
+%   options/base,
+%   options/condensed,
+%   options/Scale,
+%   options/delimitershack,
+%   options/standardversion}
 % The package has the following options:
 % \begin{description}
 % \item[base] the base weight of the math fonts, either |regular|
@@ -53,37 +60,52 @@
 % \item[condensed] whether the math fonts use the condensed version of
 % Iwona, either |true| or |false| (default).
 % \item[Scale] the scale of the fonts, a number (by default 1).
+% \item[delimitershack] whether to use the hack to get \cs{lVert} and
+% \cs{rVert} delimiters, absent in the original font (see
+% \cite[\S~12.5.5]{TLC3}), either |true| (default) or |false|.
 % \item[standardversions] whether to define standard versions |normal|
 % and |bold|, either |true| (default) or |false|.  If |false|, then
 % the package does not define any math fonts, and it is up to the user
 % to deploy \cmd{\DeclareIwonaMathVersion} do define them.  
 % \end{description}
+% \end{variable}
 %
-% \begin{function}{\DeclareIwonaMathVersion}
+%
+% \begin{function}{\DefineIwonaMathVersion}
+%   \begin{syntax}
+%     \cs{DefineIwonaMathVersion}\Arg{key/value pairs}
+%   \end{syntax}
 %   The main function of the package,
-%   \cmd{\DeclareIwonaMathVersion}\marg{keys-values} declares a new
-%   math version based on Iwona fonts.  The keys are the following:
+%   \cmd{\DefineIwonaMathVersion} declares a new
+%   math version based on Iwona fonts.  
+% \end{function}
+% The keys are the following (the defaults, where applicable,
+% correspond to the package options):
+% \begin{variable}{main/name,
+%   main/base,
+%   main/condensed,
+%   main/weight}
 %   \begin{description}
 %   \item[name] the name of the version.  By default, |normal|.
 %   \item[base] the base weight of the font, either |regular| or
 %   |light|.
 % \item[condensed] whether the math fonts use the condensed version of
-% Iwona, either |true| or |false| (default).
+% Iwona, either |true| or |false|.
 %   \item[weight] the weight of the font, either |normal| or |bold|.
 %   \end{description}
-% \end{function}
+% \end{variable}
 %
-% Note that in the current implementation the |Scale| parameter is the
-% same for all versions defined.
+% Note that in the current implementation the parameters |Scale| and
+% |delimitershack| are the same for all versions defined.
 %
 % For example, the following invocation defines four math versions,
 % |normal|, |bold|, |condensed| and |boldcondensed|, based on Iwona
 % light, scaled 1.2:
 % \begin{verbatim}
 % \usepackage[Scale=1.2, base=light]{iwonamath}
-% \DeclareIwonaMathVersion{name=condensed, base=light,
+% \DefineIwonaMathVersion{name=condensed, 
 %                          condensed=true}
-% \DeclareIwonaMathVersion{name=boldcondensed, base=light,
+% \DefineIwonaMathVersion{name=boldcondensed, 
 %                          weight=bold, condensed=true}
 % \end{verbatim}
 %
@@ -92,21 +114,50 @@
 %
 % \begin{implementation}
 %
-%\section{Implementation}
-%\label{sec:impl}
+% \section{Implementation}
+% \label{sec:impl}
 %
+% 
+%
+%\subsection{Setting up}
+%\label{sec:settingup}
+%
+%
+% 
 % First, we declare who we are:
 %    \begin{macrocode}
-%<*package>
 %<@@=iwonamath>
-\ProvidesExplPackage {iwonamath}
-{2023-08-25} {0.0.1}
-{Scaled Iwona math fonts}
+%<package>\ProvidesExplPackage {iwonamath}
+%<fd>\ProvidesExplFile
+%<ot1m>{ot1_FAMILY_m.fd}
+%<ot1>{ot1_FAMILY_.fd}
+%<oml>{oml_FAMILY_.fd}
+%<oms>{oms_FAMILY_.fd}
+%<omx>{omx_FAMILY_.fd}
+%<cmsy>{omsiwonamathcmsy.fd}
+%<package|fd>{2023-08-25} {0.0.1}
+%<package|fd>{Scaled Iwona math fonts}
+%<*package>
 %    \end{macrocode}
 %
-% \begin{variable}{\l_@@_size_tl, \l_@@_mainbase_tl,
-%                  \l_@@_maincondensed_bool, \l_@@_standardversions_bool}
-% We define the main keys here
+%
+%
+%
+%\subsection{Options}
+%\label{sec:optionSetting}
+%
+%
+% 
+% \begin{variable}{\l_@@_size_tl,
+%                  \l_@@_mainbase_tl,
+%                  \l_@@_maincondensed_bool,
+%                  \l_@@_delimetershack_bool,
+%                  \l_@@_standardversions_bool,
+%                  options/base,
+%                  options/condensed,
+%                  options/Scale,
+%                  options/delimitershack,
+%                  options/standardversion}
 %    \begin{macrocode}
 \tl_new:N \l_@@_mainbase_tl
 \keys_define:nn { iwonamath/options }
@@ -116,6 +167,7 @@
     { regular, light }
     {\tl_set:Nx \l_@@_mainbase_tl \l_keys_choice_tl},
   condensed .bool_set:N = \l_@@_maincondensed_bool,
+  delimetershack .bool_set:N = \l_@@_delimetershack_bool,
   standardversions .bool_set:N = \l_@@_standardversions_bool,
 }
 
@@ -124,6 +176,7 @@
   Size = 1,
   base = regular,
   condensed = false,
+  delimetershack = true,
   standardversions = true,
 }
 %    \end{macrocode}
@@ -141,12 +194,146 @@
   }
 %    \end{macrocode}% 
 %
+% \begin{variable}{\l_@@_versionname_tl,
+%                  \l_@@_base_tl,
+%                  \l_@@_condensed_bool,
+%                  main/name,
+%                  main/base,
+%                  main/condensed,
+%                  main/weight}
+% Now the options for the main command
+%    \begin{macrocode}
+\tl_new:N \l_@@_base_tl
+\keys_define:nn { iwonamath/main }
+{
+  name .tl_set:N = \l_@@_versionname_tl,
+  base .choices:nn =
+    { regular, light }
+    {\tl_set:Nx \l_@@_base_tl \l_keys_choice_tl},
+  condensed .bool_set:N = \l_@@_condensed_bool,
+}
+%    \end{macrocode}
+%   
+% \end{variable}
 %
-% 
+% \begin{function}{\DefineIwonaMathVersion}
+%   Now the main function
+%    \begin{macrocode}
+\DeclareDocumentCommand \DefineIwonaMathVersion { m }
+{
+}
+%    \end{macrocode}
+% \end{function}
 %
 %    \begin{macrocode}
 %</package>
 %    \end{macrocode}
+%
+%
+%
+%\subsection{Font definition files}
+%\label{sec:fd}
+%
+%
+%
+% Now, the fd files.  Sometimes they are defined in special |fdd|
+% files; here we use the main |dtx| for this.
+%
+% First, we check if the size is defined.  If not,
+% we define it.
+%    \begin{macrocode}
+%<*fd>
+\tl_if_exist:NTF \l_@@_size_tl
+{}
+{
+  \tl_new:N \l_@@_size_tl
+  \tl_set:Nn \l_@@_size_tl {1}
+}
+%</fd>
+%    \end{macrocode}
+%
+% Our version of |cmsy| just scales the font.  Note that right now the
+% scaling is exactly the same as for other iwona math
+% characters---maybe we need to fine tune this.
+%    \begin{macrocode}
+%<*cmsy>
+\DeclareFontFamily{OMS}{iwonamathcmsy}{\skewchar\font48 }
+\DeclareFontShape{OMS}{iwonamathcmsy}{m}{n}{%
+      <5><6><7><8><9><10> \l_@@_size_tl gen*cmsy%
+      <10.95><12><14.4><17.28><20.74><24.88> \l_@@_size_tl cmsy10%
+      }{}
+\DeclareFontShape{OMS}{iwonamathcmsy}{b}{n}{%
+      <5><6><7><8><9> \l_@@_size_tl gen*cmbsy%
+      <10><10.95><12><14.4><17.28><20.74><24.88> \l_@@_size_tl cmbsy10%
+      }{}
+%</cmsy>
+%    \end{macrocode}
+%
+% \begin{table}
+%   \centering
+%   \caption{Naming scheme for iwona fonts}
+%   \label{tab:naming}
+%   \begin{tabular}{lllll}
+%       \toprule
+%       Weight/Shape & \multicolumn{4}{c}{Base}\\
+%       \cmidrule{2-5}\\
+%                      & Regular & Condensed & Light & Light Condensed \\
+%       \midrule
+%       m/n & iwonar & iwonacr & iwonal & iwonacl \\
+%       m/it & iwonari & iwonacri & iwonali & iwonacli \\
+%       b/n & iwonab & iwonacb & iwonam & iwonacm \\
+%       b/it & iwonabi & iwonacb & iwonami & iwonacmi \\
+%       \bottomrule
+%     \end{tabular}
+% \end{table}
+% 
+% Now, we need many files in the different weights and
+% condensed/regular status.  It would be too tedious to write all
+% them.  So we create a template with the special marks and a bash
+% script to generate all |fd| files.  Of course, \TeX\ with enough
+% trickery can be used instead of bash, but why bother: we employ
+% Makefiles anyways\ldots
+%
+% The naming scheme for Iwona fonts is shown in
+% Table~\ref{tab:naming}.  From this table we see we need three marks:
+% |_FAMILY_| for the base family, |_MEDIUM_| for medium font and
+% |_BOLD_| for bold font.
+%
+% We have two |OT1| files: one for default letters, one for |\math...|
+% commands.
+%    \begin{macrocode}
+%<*ot1m>
+\DeclareFontFamily{OT1}{_FAMILY_m}{}
+\DeclareFontShape{OT1}{_FAMILY_m}{m}{n}{<-> \l_@@_size_tl rm-_MEDIUM_}{}
+\DeclareFontShape{OT1}{_FAMILY_m}{b}{n}{<-> \l_@@_size_tl rm-_BOLD_}{}
+%</ot1m>
+%<*ot1>
+\DeclareFontFamily{OT1}{_FAMILY_}{}
+\DeclareFontShape{OT1}{_FAMILY_}{m}{n}{<-> \l_@@_size_tl rm-_MEDIUM_}{}
+\DeclareFontShape{OT1}{_FAMILY_}{m}{it}{<-> \l_@@_size_tl rm-_MEDIUM_i}{}
+\DeclareFontShape{OT1}{_FAMILY_}{b}{n}{<-> \l_@@_size_tl rm-_BOLD_}{}
+\DeclareFontShape{OT1}{_FAMILY_}{bx}{n}{<-> \l_@@_size_tl rm-_BOLD_}{}
+%</ot1>
+%<*oml>
+\DeclareFontFamily{OML}{_FAMILY_}{}
+\DeclareFontShape{OML}{_FAMILY_}{m}{it}{<-> \l_@@_size_tl mi-_MEDIUM_i}{}
+\DeclareFontShape{OML}{_FAMILY_}{b}{it}{<-> \l_@@_size_tl mi-_BOLD_i}{}
+\DeclareFontShape{OML}{_FAMILY_}{bx}{it}{<-> \l_@@_size_tl mi-_BOLD_i}{}
+%</oml>
+%<*oms>
+\DeclareFontFamily{OMS}{_FAMILY_}{}
+\DeclareFontShape{OMS}{_FAMILY_}{m}{n}{<-> \l_@@_size_tl sy-_MEDIUM_z}{}
+\DeclareFontShape{OMS}{_FAMILY_}{b}{n}{<-> \l_@@_size_tl sy-_BOLD_z}{}
+\DeclareFontShape{OMS}{_FAMILY_}{bx}{n}{<-> \l_@@_size_tl sy-_BOLD_z}{}
+%</oms>
+%<*omx>
+\DeclareFontFamily{OMX}{_FAMILY_}{}
+\DeclareFontShape{OMX}{_FAMILY_}{m}{n}{<-> \l_@@_size_tl ex-_MEDIUM_}{}
+\DeclareFontShape{OMX}{_FAMILY_}{b}{n}{<-> \l_@@_size_tl ex-_BOLD_}{}
+\DeclareFontShape{OMX}{_FAMILY_}{bx}{n}{<-> \l_@@_size_tl ex-_BOLD_}{}
+%</omx>
+%    \end{macrocode}
+% 
 % \end{implementation}
 %
 % \bibliography{iwonamath}
