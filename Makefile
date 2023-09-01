@@ -44,7 +44,7 @@ all:  ${PDF} $(PACKAGE).sty $(FD)
 %.sty:   %.ins %.dtx  
 	pdflatex $<
 
-%.pdf:  %.tex   $(PACKAGE).sty
+%.pdf:  %.tex   $(PACKAGE).sty $(FD)
 	pdflatex $<
 	- bibtex $*
 	pdflatex $<
@@ -76,7 +76,7 @@ distclean: clean
 archive:  all clean
 	COPYFILE_DISABLE=1  \
 	tar -C .. -czvf ../$(PACKAGE).tgz --exclude '*~' \
-	--exclude '*.tgz' --exclude '*.zip'  --exclude CVS $(PACKAGE)
+	--exclude '*.tgz' --exclude '*.zip'  --exclude .git $(PACKAGE)
 	mv ../$(PACKAGE).tgz .
 
 zip:  all clean
