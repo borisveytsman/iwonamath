@@ -1,8 +1,8 @@
 PACKAGE=iwonamath
 
-SAMPLES = 
+SAMPLES = sample.tex
 
-PDF = $(PACKAGE).pdf 
+PDF = $(PACKAGE).pdf ${SAMPLES:%.tex=%.pdf}
 
 FD = \
 	omliwonamath.fd \
@@ -27,7 +27,7 @@ FD = \
 	ot1iwonamathlm.fd \
 	ot1iwonamathm.fd 
 
-all:  ${PDF} $(PACKAGE).sty $(FD)
+all:  ${PDF} $(PACKAGE).sty $(FD) 
 
 
 %.pdf:  %.dtx   $(PACKAGE).sty
@@ -63,7 +63,7 @@ clean:
 	*.cfg *.glo *.idx *.toc \
 	*.ilg *.ind *.out *.lof \
 	*.lot *.bbl *.blg *.gls \
-	*.dvi *.ps *.thm *.tgz *.zip *.rpi sample.tex \
+	*.dvi *.ps *.thm *.tgz *.zip *.rpi \
         *.hd sample-blx.bib
 
 
