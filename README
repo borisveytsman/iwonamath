@@ -1,0 +1,5 @@
+This package provides an interface to Iwona math fonts by Janusz
+Marian Nowacki.  It allows to use Iwona as math complement for sans
+serif fonts without native math.  The package allows font scaling, the
+choice of light and condensed versions and creation of multiple math
+versions.
