@@ -64,7 +64,8 @@ clean:
 	*.ilg *.ind *.out *.lof \
 	*.lot *.bbl *.blg *.gls \
 	*.dvi *.ps *.thm *.tgz *.zip *.rpi \
-        *.hd sample-blx.bib
+        *.hd sample-blx.bib \
+	omsiwonamathcmsy.fd *.sty
 
 
 distclean: clean
@@ -75,7 +76,7 @@ distclean: clean
 #
 archive:  all clean
 	COPYFILE_DISABLE=1  \
-	tar -C .. -czvf ../$(PACKAGE).tgz --exclude '*~' \
+	tar -C .. -czvf ../$(PACKAGE).tgz --exclude '*~' --exclude LICENSE \
 	--exclude '*.tgz' --exclude '*.zip'  --exclude .git $(PACKAGE)
 	mv ../$(PACKAGE).tgz .
 
