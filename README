@@ -3,3 +3,6 @@ Marian Nowacki.  It allows to use Iwona as math complement for sans
 serif fonts without native math.  The package allows font scaling, the
 choice of light and condensed versions and the creation of multiple
 math versions.
+
+Author: Boris Veytsman, borisv@lk.net, boris@varphi.com
+License: LPPL 1.3c, https://www.latex-project.org/lppl/lppl-1-3c/
