@@ -141,7 +141,7 @@
 %<oms>{oms_FAMILY_.fd}
 %<omx>{omx_FAMILY_.fd}
 %<cmsy>{omsiwonamathcmsy.fd}
-%<package|fd>{2023-08-31} {1.0}
+%<package|fd>{2024-07-19} {1.1}
 %<package|fd>{Scaled Iwona math fonts}
 %<*package>
 %    \end{macrocode}
@@ -233,7 +233,8 @@
 %
 % We add delimiters from |cmsy|, as discussed in
 % \citep[\S~12.5.5]{TLC3}).  We predefine the symbols for the standard
-% versions just in case.
+% versions just in case.  The last line is suggested by Enrico
+% Gregorio. 
 %    \begin{macrocode}
 \bool_if:NTF \l_@@_delimitershack_bool
 {
@@ -241,6 +242,7 @@
   \SetSymbolFont{symbols2}    {bold}{OMS}{cmsy}{b}{n}
   \DeclareMathDelimiter{\lVert}{\mathopen} {symbols2}{"6B}{largesymbols}{"0D}
   \DeclareMathDelimiter{\rVert}{\mathclose}{symbols2}{"6B}{largesymbols}{"0D}
+  \DeclareMathDelimiter{\|}{\mathclose}{symbols2}{"6B}{largesymbols}{"0D}
 }
 {}
 %    \end{macrocode}
